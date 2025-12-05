@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Void</title>
+    <style>
+        /* --- Reset & Base --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif; /* Clean, modern font */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Canvas Background --- */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* --- The Glass Card (Initially Hidden) --- */
+        .glass-container {
+            z-index: 10;
+            position: relative;
+            opacity: 0; /* Start hidden */
+            transform: scale(0.9) translateY(20px);
+            transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1); /* Smooth elegant ease */
+            
+            /* Glassmorphism Styles */
+            background: rgba(25, 25, 25, 0.1); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.2); /* Subtle highlight */
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.02);
+            
+            padding: 4rem 6rem;
+            border-radius: 24px;
+            text-align: center;
+        }
+
+        /* Class to trigger the reveal */
+        .glass-container.reveal {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* --- Typography & Text Effects --- */
+        h1 {
+            font-size: 4rem;
+            font-weight: 200;
+            letter-spacing: -2px;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            
+            /* Aesthetic Glow */
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.2),
+                0 0 40px rgba(255, 255, 255, 0.1);
+            
+            animation: textPulse 4s infinite alternate;
+        }
+
+        .subtitle {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+        }
+
+        @keyframes textPulse {
+            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.1); opacity: 0.8; }
+            100% { text-shadow: 0 0 25px rgba(255, 255, 255, 0.5); opacity: 1; }
+        }
+
+        /* --- Progress Bar (Optional, for visual tension) --- */
+        .loader {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            width: 0%;
+            opacity: 0.3;
+            transition: width 10s linear;
+        }
+        
+        .loader.loading {
+            width: 100%;
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <canvas id="starfield"></canvas>
+    
+    <div class="loader" id="loader-line"></div>
+
+    <div class="glass-container" id="message-box">
+        <div class="subtitle">Message received from void</div>
+        <h1>Fuck You<br>Dude.</h1>
+    </div>
+
+    <script>
+        // --- 1. The Universe Animation Logic (Canvas) ---
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        // Resize canvas to fill screen
+        const resize = () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        };
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Star Particle Class
+        class Star {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.z = Math.random() * 2 + 0.5; // Depth/Size
+                this.opacity = Math.random();
+                this.blinkSpeed = 0.005 + Math.random() * 0.01;
+                this.velocity = (Math.random() * 0.5) * 0.2; // Very slow drift
+            }
+
+            update() {
+                // Blink effect
+                this.opacity += this.blinkSpeed;
+                if (this.opacity > 1 || this.opacity < 0) {
+                    this.blinkSpeed = -this.blinkSpeed;
+                }
+                
+                // Drift movement
+                this.y -= this.velocity; // Move up slowly
+                
+                // Reset if goes off screen
+                if (this.y < 0) this.y = height;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.z, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(this.opacity)})`;
+                ctx.shadowBlur = this.z * 2;
+                ctx.shadowColor = "white";
+                ctx.fill();
+            }
+        }
+
+        // Create Star Array
+        const stars = [];
+        const starCount = 300; // Adjust for density
+        for(let i = 0; i < starCount; i++) {
+            stars.push(new Star());
+        }
+
+        // Animation Loop
+        function animate() {
+            // Clear screen with a slight fade trail for smoothness
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.5)'; // Matches body bg
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        // --- 2. The Pop-out Logic (Timer) ---
+        
+        // Start the loader line immediately
+        setTimeout(() => {
+            document.getElementById('loader-line').classList.add('loading');
+        }, 100);
+
+        // Trigger the message after 10 seconds (10000ms)
+        setTimeout(() => {
+            const box = document.getElementById('message-box');
+            box.classList.add('reveal');
+            
+            // Remove loader after reveal to clean up
+            const loader = document.getElementById('loader-line');
+            loader.style.opacity = '0';
+        }, 10000);
+
+    </script>
+</body>
+</html>
