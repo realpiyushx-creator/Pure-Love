@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incoming Transmission</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <title>Singularity Event</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE CONFIG --- */
         :root {
             --bg: #000000;
-            --glass: rgba(20, 20, 20, 0.4);
-            --border: rgba(255, 255, 255, 0.15);
-            --glow: 0 0 20px rgba(255, 255, 255, 0.5);
-            --accent: #ffffff;
+            /* Deeper, darker glass */
+            --glass: rgba(5, 5, 5, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+            --highlight: rgba(255, 255, 255, 0.2);
         }
 
         body {
             margin: 0;
             background: var(--bg);
             color: white;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             overflow: hidden;
             height: 100vh;
             display: flex;
@@ -27,334 +26,393 @@
             justify-content: center;
         }
 
-        /* --- BACKGROUND FX --- */
+        /* --- LAYERS --- */
         canvas {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             z-index: 1;
+            /* Initial state for chromatic distortion */
+            transition: filter 0.2s ease;
         }
 
+        /* Heavy Vignette for depth */
         .vignette {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 40%, black 120%);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.8) 80%, black 100%);
             z-index: 2;
             pointer-events: none;
         }
 
-        /* Screen Shake Animation Class */
-        .shake-screen {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
-        }
-
-        /* --- THE TIMER / INTRO --- */
-        .intro-layer {
-            z-index: 10;
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: opacity 0.5s ease;
-        }
-        
-        .intro-layer.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .countdown-text {
-            font-size: 0.8rem;
-            letter-spacing: 0.5em;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            width: 300px;
-            height: 2px;
-            background: #111;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background: white;
-            width: 0%;
-            box-shadow: 0 0 15px white;
-            transition: width 10s linear; /* The 10s timer */
-        }
-
-        /* --- THE REVEAL CARD --- */
-        .glass-card {
-            z-index: 20;
-            position: relative;
-            padding: 5rem 7rem;
-            
-            /* Ultra Glass */
-            background: var(--glass);
-            backdrop-filter: blur(40px) brightness(1.2);
-            -webkit-backdrop-filter: blur(40px) brightness(1.2);
-            border: 1px solid var(--border);
-            border-top: 1px solid rgba(255,255,255,0.3);
-            border-radius: 2px;
-            
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.2s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .glass-card.boom {
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 0 100px rgba(255, 255, 255, 0.15);
-        }
-
-        /* GLITCH TEXT EFFECT */
-        h1 {
-            font-size: 6rem;
-            font-weight: 900;
-            line-height: 0.9;
-            margin: 0;
-            text-transform: uppercase;
-            color: white;
-            position: relative;
-            text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #00ffff;
-            animation: glitch-anim 3s infinite linear alternate-reverse;
-        }
-
-        .sub {
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            letter-spacing: 4px;
-            color: rgba(255,255,255,0.5);
-            text-transform: uppercase;
-        }
-
-        @keyframes glitch-anim {
-            0% { text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #00ffff; }
-            2% { text-shadow: -2px 1px 0px #ff0055, 1px -2px 0px #00ffff; transform: translate(2px,0); }
-            4% { text-shadow: 2px -1px 0px #ff0055, -2px 2px 0px #00ffff; transform: translate(-2px,0); }
-            6% { text-shadow: 0px 0px 0px transparent; transform: translate(0,0); }
-            100% { text-shadow: 0px 0px 0px transparent; transform: translate(0,0); }
-        }
-
-        /* Flash Effect */
-        .flash-overlay {
+        /* The White Flash */
+        .flash-bang {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: white;
+            z-index: 99;
             opacity: 0;
             pointer-events: none;
-            z-index: 50;
-            transition: opacity 1s ease-out;
+            transition: opacity 1.5s ease-out;
         }
+
+        /* --- CSS ANIMATIONS --- */
+        .reality-tear {
+            /* The screen warping effect just before the drop */
+            filter: drop-shadow(-10px 0 rgba(255,0,0,0.8)) drop-shadow(10px 0 rgba(0,255,255,0.8)) blur(1px);
+            transform: scale(1.05);
+        }
+
+        .shake-hard {
+            animation: shakeHard 0.2s infinite;
+        }
+
+        @keyframes shakeHard {
+            0% { transform: translate(0px, 0px) rotate(0deg); }
+            20% { transform: translate(-10px, 5px) rotate(-1deg); }
+            40% { transform: translate(-5px, -10px) rotate(1deg); }
+            60% { transform: translate(10px, 10px) rotate(0deg); }
+            80% { transform: translate(5px, -5px) rotate(-1deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+
+        /* --- INTRO UI --- */
+        .hud-layer {
+            z-index: 10;
+            position: absolute;
+            bottom: 10%;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 20px currentColor;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .load-bar-container {
+            width: 300px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .load-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #fff, #aaa);
+            box-shadow: 0 0 25px white;
+            transition: width 10s cubic-bezier(0.25, 1, 0.5, 1); /* Eased for dramatic effect */
+        }
+
+        /* --- THE FINAL CARD --- */
+        .ultraglass-card {
+            z-index: 50;
+            position: relative;
+            padding: 6rem 8rem;
+            
+            /* Advanced Glassmorphism */
+            background: var(--glass);
+            box-shadow: 
+                0 50px 100px -20px rgba(0,0,0,1), /* Deep shadow */
+                inset 0 0 30px var(--highlight), /* Inner glow */
+                0 0 50px rgba(255,255,255,0.1); /* Outer aura */
+            backdrop-filter: blur(50px) brightness(0.8);
+            -webkit-backdrop-filter: blur(50px) brightness(0.8);
+            
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            border-top-color: var(--highlight);
+            border-left-color: rgba(255,255,255,0.05);
+
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.7) translateY(50px) rotateX(20deg);
+            filter: blur(20px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ultraglass-card.reveal {
+            opacity: 1;
+            transform: scale(1) translateY(0) rotateX(0deg);
+            filter: blur(0px);
+        }
+
+        h1 {
+            font-size: 7rem;
+            font-weight: 900;
+            line-height: 0.85;
+            margin: 0;
+            text-transform: uppercase;
+            color: transparent;
+            background: linear-gradient(180deg, #fff 20%, #555 100%);
+            -webkit-background-clip: text;
+            
+            /* Aggressive Glitch Shadow */
+            text-shadow: 5px 0px 0px rgba(255,0,0,0.8), -5px 0px 0px rgba(0,255,255,0.8);
+            animation: textGlitch 0.2s infinite steps(2, end);
+        }
+
+        .subtitle {
+            margin-top: 2rem;
+            font-size: 1rem;
+            letter-spacing: 8px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        @keyframes textGlitch {
+            0% { text-shadow: 5px 0px 0px rgba(255,0,0,0.8), -5px 0px 0px rgba(0,255,255,0.8); }
+            50% { text-shadow: -5px 2px 0px rgba(255,0,0,0.8), 5px -2px 0px rgba(0,255,255,0.8); transform: translate(-2px, 1px); }
+        }
+        
+        .hidden { opacity: 0; pointer-events: none; }
+
     </style>
 </head>
 <body>
 
+    <canvas id="cosmos"></canvas>
     <div class="vignette"></div>
-    <div class="flash-overlay" id="flash"></div>
-    <canvas id="universe"></canvas>
+    <div class="flash-bang" id="flash"></div>
 
-    <div class="intro-layer" id="intro">
-        <div class="countdown-text" id="status-text">System Normal</div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="fill"></div>
+    <div class="hud-layer" id="hud">
+        <div class="status-text" id="status">Sequence Start</div>
+        <div class="load-bar-container">
+            <div class="load-bar-fill" id="bar-fill"></div>
         </div>
     </div>
 
-    <div class="glass-card" id="card">
+    <div class="ultraglass-card" id="final-card">
         <h1>Fuck You<br>Dude.</h1>
-        <div class="sub">Have a nice day</div>
+        <div class="subtitle">Welcome to the void</div>
     </div>
 
     <script>
-        // --- CANVAS SETUP ---
-        const canvas = document.getElementById('universe');
+        const canvas = document.getElementById('cosmos');
         const ctx = canvas.getContext('2d');
-        let width, height;
-        
-        let phase = 'WARP'; // 'WARP' or 'EXPLODE'
-        let speedMultiplier = 1;
+        let w, h;
+
+        // --- Configuration & State ---
+        let speed = 5;
+        let timeElapsed = 0; // ms
+        const totalTime = 10000; // 10s
+        let phase = 1; // 1=Cruise, 2=Planets, 3=Black Hole, 4=Done
+
+        // Noise generator for shakes
+        const noise = () => Math.random() * 2 - 1;
 
         function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // --- STAR SYSTEM ---
-        const stars = [];
-        const numStars = 800;
-        const centerX = width / 2;
-        const centerY = height / 2;
+        // --- OBJECTS ---
 
+        // Star Class (Background noise)
         class Star {
-            constructor() {
-                this.init();
+            constructor() { this.reset(true); }
+            reset(init = false) {
+                this.x = (Math.random() - 0.5) * w * 3; // Wider spread
+                this.y = (Math.random() - 0.5) * h * 3;
+                this.z = init ? Math.random() * w : w;
+                this.size = Math.random() * 2;
             }
-
-            init() {
-                this.x = (Math.random() - 0.5) * width * 2; // Wide spread
-                this.y = (Math.random() - 0.5) * height * 2;
-                this.z = Math.random() * width; 
-                this.pz = this.z;
-            }
-
             update() {
-                if (phase === 'WARP') {
-                    // Move towards camera (decrease Z)
-                    // Speed increases based on the multiplier
-                    this.z -= (10 * speedMultiplier);
-                    
-                    if (this.z <= 0) {
-                        this.z = width;
-                        this.pz = this.z;
-                        this.x = (Math.random() - 0.5) * width * 2;
-                        this.y = (Math.random() - 0.5) * height * 2;
-                    }
-                } else if (phase === 'EXPLODE') {
-                    // Move OUTWARDS from center
-                    // We interpret x,y as vectors from center now
-                    this.z -= 5; // Slow drift Z
-                    // Explode outward logic is purely visual in draw for this style
-                }
+                this.z -= speed;
+                if (this.z <= 1) this.reset();
             }
+            draw(cx, cy) {
+                // Perspective calculation
+                let sx = (this.x / this.z) * w + cx;
+                let sy = (this.y / this.z) * w + cy;
+                let r = (1 - this.z / w) * this.size * 3;
+                let alpha = (1 - this.z / w);
 
-            draw() {
-                const x = this.x;
-                const y = this.y;
-                const z = this.z;
-
-                // 3D Projection
-                const sx = (x / z) * width + width/2;
-                const sy = (y / z) * width + height/2;
-
-                // Previous position (for trails)
-                const px = (x / this.pz) * width + width/2;
-                const py = (y / this.pz) * width + height/2;
-
-                this.pz = z;
-
-                if (sx < 0 || sx > width || sy < 0 || sy > height) return;
-
-                const size = (1 - z / width) * 4;
-                const alpha = (1 - z / width);
-
-                ctx.beginPath();
-                ctx.moveTo(px, py);
-                ctx.lineTo(sx, sy);
-                ctx.lineWidth = size;
-                
-                if (phase === 'WARP') {
-                    // Blue/White tint during warp
-                    ctx.strokeStyle = `rgba(200, 220, 255, ${alpha})`;
+                if(phase === 3) { // Redshift near black hole
+                     ctx.fillStyle = `rgba(255, ${200 * alpha}, ${200 * alpha}, ${alpha})`;
                 } else {
-                    // White/Red chaotic tint during explode
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                     ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                 }
-                
-                ctx.lineCap = 'round';
-                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(sx, sy, r, 0, Math.PI*2);
+                ctx.fill();
             }
         }
 
-        // Initialize stars
-        for(let i=0; i<numStars; i++) stars.push(new Star());
+        // Planet Class (Passing objects)
+        class Planet {
+            constructor() { this.active = false; }
+            spawn() {
+                this.x = (Math.random() - 0.5) * w * 4; // Spawn far out
+                this.y = (Math.random() - 0.5) * h * 2;
+                this.z = w * 1.5; // Start further back
+                this.radius = 50 + Math.random() * 150;
+                // Random planet colors
+                const hue = Math.random() * 360;
+                this.color1 = `hsl(${hue}, 60%, 50%)`;
+                this.color2 = `hsl(${hue+30}, 70%, 10%)`;
+                this.active = true;
+            }
+            update() {
+                if(!this.active) return;
+                this.z -= speed * 1.2; // Move slightly faster than stars
+                if (this.z <= 100 || this.x/this.z * w > w*2) this.active = false; // Cull
+            }
+            draw(cx, cy) {
+                if(!this.active || this.z < 100) return;
+                let sx = (this.x / this.z) * w + cx;
+                let sy = (this.y / this.z) * w + cy;
+                let r = (1 - this.z / (w*1.5)) * this.radius; // Scale based on depth
+
+                // Faux-3D Gradient
+                let grad = ctx.createRadialGradient(sx - r/3, sy - r/3, r/10, sx, sy, r);
+                grad.addColorStop(0, this.color1);
+                grad.addColorStop(1, this.color2);
+                
+                ctx.beginPath();
+                ctx.arc(sx, sy, r, 0, Math.PI*2);
+                ctx.fillStyle = grad;
+                // Atmospheric glow
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = this.color1;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // --- INIT OBJECTS ---
+        const stars = Array(800).fill().map(() => new Star());
+        const planets = Array(5).fill().map(() => new Planet()); // Pool of 5 planets
 
         // --- ANIMATION LOOP ---
-        function animate() {
-            // Motion Blur Trail Effect
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; 
-            ctx.fillRect(0, 0, width, height);
+        let lastTime = 0;
+        function animate(timeStamp) {
+            const deltaTime = timeStamp - lastTime;
+            lastTime = timeStamp;
+            if(phase < 4) timeElapsed += deltaTime;
 
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
+            // --- TIMELINE LOGIC ---
+            let shakeIntensity = 0;
+            let centerX = w/2;
+            let centerY = h/2;
+            let blackHoleSize = 0;
 
-
-        // --- LOGIC CONTROLLER ---
-        const fill = document.getElementById('fill');
-        const status = document.getElementById('status-text');
-        const intro = document.getElementById('intro');
-        const card = document.getElementById('card');
-        const flash = document.getElementById('flash');
-        const body = document.body;
-
-        // 1. Start Progress Bar
-        setTimeout(() => {
-            fill.style.width = '100%';
-        }, 100);
-
-        // 2. Accelerate the Warp (0-10s)
-        let time = 0;
-        const accelerator = setInterval(() => {
-            time += 100;
-            // Linearly increase speed multiplier
-            speedMultiplier = 1 + (time / 1000) * 1.5; 
-            
-            // Update Text
-            if (time === 2000) status.innerText = "Target Locked";
-            if (time === 5000) status.innerText = "Velocity Max";
-            if (time === 8000) {
-                status.innerText = "Brace for Impact";
-                status.style.color = "#fff";
-                status.style.textShadow = "0 0 10px white";
+            if (timeElapsed < 4000) {
+                // Phase 1: Cruise
+                phase = 1; speed = 10;
+                document.getElementById('status').innerText = "Interstellar Cruise";
+            } else if (timeElapsed < 7500) {
+                // Phase 2: Planets & Acceleration
+                phase = 2;
+                speed += 0.5; // Accelerate
+                if(Math.random() > 0.97) { // Randomly spawn planets
+                    const available = planets.find(p => !p.active);
+                    if(available) available.spawn();
+                }
+                shakeIntensity = 1;
+                document.getElementById('status').innerText = "Entering System / accelerating";
+            } else if (timeElapsed < 9900) {
+                // Phase 3: Black Hole Approach
+                phase = 3;
+                speed += 2; // Rapid acceleration
+                shakeIntensity = 5 + (timeElapsed - 7500) / 200; // Increasing shake
+                blackHoleSize = (timeElapsed - 7500) / 5; // Growing black hole
+                document.getElementById('status').innerText = "WARNING: EVENT HORIZON";
+                document.getElementById('status').style.color = "red";
+            } else if (timeElapsed >= 10000 && phase !== 4) {
+                triggerDrop();
             }
-        }, 100);
 
-        // 3. THE DROP (10s)
-        setTimeout(() => {
-            clearInterval(accelerator);
+            // Apply Shake to center point
+            if(shakeIntensity > 0) {
+                centerX += noise() * shakeIntensity;
+                centerY += noise() * shakeIntensity;
+            }
+
+            // --- DRAWING ---
+            // Clear with trail effect
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(0, 0, w, h);
+            ctx.globalCompositeOperation = 'lighter'; // Make things glow
+
+            // Draw Stars
+            stars.forEach(s => { s.update(); s.draw(centerX, centerY); });
+            // Draw Planets
+            planets.forEach(p => { p.update(); p.draw(centerX, centerY); });
+
+            // Draw Black Hole (Phase 3)
+            if (phase === 3) {
+                 ctx.globalCompositeOperation = 'source-over';
+                 // The Singularity (Black center)
+                 ctx.beginPath();
+                 ctx.arc(centerX, centerY, blackHoleSize, 0, Math.PI*2);
+                 ctx.fillStyle = "#000";
+                 ctx.fill();
+                 
+                 // The Accretion Disk (Glowing Ring)
+                 ctx.beginPath();
+                 ctx.arc(centerX, centerY, blackHoleSize * 1.2, 0, Math.PI*2);
+                 ctx.lineWidth = 10 + noise() * 5;
+                 ctx.strokeStyle = `rgba(255, 100, 50, ${Math.random() * 0.5 + 0.5})`;
+                 ctx.shadowColor = 'red';
+                 ctx.shadowBlur = 50;
+                 ctx.stroke();
+                 ctx.shadowBlur = 0;
+            }
             
-            // Visual FX
-            phase = 'EXPLODE'; // Stops the warp loop logic
-            
-            // Flash Screen
-            flash.style.opacity = '0.8';
-            setTimeout(() => { flash.style.opacity = '0'; }, 100);
+            ctx.globalCompositeOperation = 'source-over'; // Reset
 
-            // Hide Intro
-            intro.classList.add('hidden');
+            if(phase < 4) requestAnimationFrame(animate);
+        }
 
-            // Screen Shake
-            body.classList.add('shake-screen');
 
-            // Show Card (Boom)
+        // --- THE DROP SEQUENCE ---
+        function triggerDrop() {
+            phase = 4;
+            const body = document.body;
+            const canvasEl = document.getElementById('cosmos');
+            const flash = document.getElementById('flash');
+            const hud = document.getElementById('hud');
+            const card = document.getElementById('final-card');
+
+            // 1. Reality Tear (Last 100ms before drop)
+            canvasEl.classList.add('reality-tear');
+            body.classList.add('shake-hard');
+
             setTimeout(() => {
-                card.classList.add('boom');
-            }, 200); // Slight delay so the flash hits first
+                // 2. The Flash
+                flash.style.opacity = 1;
+                
+                // 3. Cleanup & Reveal
+                setTimeout(() => {
+                    canvasEl.style.display = 'none'; // Kill canvas
+                    body.classList.remove('shake-hard');
+                    hud.classList.add('hidden');
+                    flash.style.opacity = 0; // Fade out flash
+                    
+                    // Show Card
+                    card.classList.add('reveal');
+                }, 200);
+            }, 100);
+        }
 
-        }, 10000);
+        // Start
+        setTimeout(() => {
+             document.getElementById('bar-fill').style.width = '100%';
+             animate(0);
+        }, 100);
 
     </script>
 </body>
