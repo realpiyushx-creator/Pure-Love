@@ -3,216 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Void</title>
+    <title>Void Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
     <style>
-        /* --- Reset & Base --- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- 1. CORE AESTHETICS --- */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-blur: blur(25px);
+            --neon-white: 0 0 15px rgba(255, 255, 255, 0.6);
         }
 
         body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Montserrat', sans-serif; /* Clean, modern font */
-            height: 100vh;
-            width: 100vw;
+            margin: 0;
             overflow: hidden;
+            background-color: #000000;
+            font-family: 'Space Grotesk', sans-serif;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: white;
         }
 
-        /* --- Canvas Background --- */
+        /* Scanline / Grain Overlay for that "Retro-Future" vibe */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 5;
+        }
+
         canvas {
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 0;
+            z-index: 1;
         }
 
-        /* --- The Glass Card (Initially Hidden) --- */
-        .glass-container {
+        /* --- 2. INTRO SEQUENCE (0-10s) --- */
+        .intro-container {
             z-index: 10;
-            position: relative;
-            opacity: 0; /* Start hidden */
-            transform: scale(0.9) translateY(20px);
-            transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1); /* Smooth elegant ease */
-            
-            /* Glassmorphism Styles */
-            background: rgba(25, 25, 25, 0.1); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.2); /* Subtle highlight */
-            border-left: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.02);
-            
-            padding: 4rem 6rem;
-            border-radius: 24px;
-            text-align: center;
-        }
-
-        /* Class to trigger the reveal */
-        .glass-container.reveal {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-
-        /* --- Typography & Text Effects --- */
-        h1 {
-            font-size: 4rem;
-            font-weight: 200;
-            letter-spacing: -2px;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            
-            /* Aesthetic Glow */
-            text-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.3),
-                0 0 20px rgba(255, 255, 255, 0.2),
-                0 0 40px rgba(255, 255, 255, 0.1);
-            
-            animation: textPulse 4s infinite alternate;
-        }
-
-        .subtitle {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            letter-spacing: 5px;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-        }
-
-        @keyframes textPulse {
-            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.1); opacity: 0.8; }
-            100% { text-shadow: 0 0 25px rgba(255, 255, 255, 0.5); opacity: 1; }
-        }
-
-        /* --- Progress Bar (Optional, for visual tension) --- */
-        .loader {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #fff, transparent);
-            width: 0%;
-            opacity: 0.3;
-            transition: width 10s linear;
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 1s ease;
         }
-        
-        .loader.loading {
-            width: 100%;
+
+        .intro-text {
+            font-size: 1.2rem;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            animation: glitch 2s infinite;
+        }
+
+        .timer-line {
+            width: 200px;
+            height: 1px;
+            background: #333;
+            margin: 20px auto 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: white;
+            width: 0%;
+            transition: width 10s linear;
+            box-shadow: 0 0 10px white;
+        }
+
+        /* --- 3. THE FINAL GLASS CARD --- */
+        .glass-modal {
+            z-index: 20;
+            position: relative;
+            padding: 5rem 8rem;
+            
+            /* The "Premium Glass" Effect */
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            border-radius: 4px; /* Sharp corners for modern look, or use 30px for soft */
+            
+            opacity: 0;
+            transform: scale(1.1) rotateX(10deg);
+            filter: blur(10px);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-modal.active {
+            opacity: 1;
+            transform: scale(1) rotateX(0deg);
+            filter: blur(0px);
+        }
+
+        .glass-modal h1 {
+            font-size: 5rem;
+            margin: 0;
+            line-height: 1;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            
+            /* Cool Metal/White Gradient Text */
+            background: linear-gradient(180deg, #ffffff 0%, #aaaaaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
+        }
+
+        .glass-modal p {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- Utility Classes --- */
+        .hidden {
+            opacity: 0 !important;
         }
 
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <canvas id="starfield"></canvas>
-    
-    <div class="loader" id="loader-line"></div>
+    <div class="overlay"></div>
+    <canvas id="warpCanvas"></canvas>
 
-    <div class="glass-container" id="message-box">
-        <div class="subtitle">Message received from void</div>
-        <h1>Fuck You<br>Dude.</h1>
+    <div class="intro-container" id="intro">
+        <div class="intro-text" id="intro-text">INITIALIZING...</div>
+        <div class="timer-line">
+            <div class="timer-fill" id="progress"></div>
+        </div>
+    </div>
+
+    <div class="glass-modal" id="modal">
+        <h1>Fuck you<br>dude.</h1>
+        <p>With love from the universe</p>
     </div>
 
     <script>
-        // --- 1. The Universe Animation Logic (Canvas) ---
-        const canvas = document.getElementById('starfield');
+        // --- 1. 3D WARP SPEED ANIMATION ---
+        const canvas = document.getElementById('warpCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
 
-        // Resize canvas to fill screen
-        const resize = () => {
+        let stars = [];
+        const numStars = 600;
+        const speed = 0.2; // Speed of the warp
+
+        function resize() {
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
-        };
+        }
         window.addEventListener('resize', resize);
         resize();
 
-        // Star Particle Class
         class Star {
             constructor() {
-                this.reset();
+                this.reset(true);
             }
-
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.z = Math.random() * 2 + 0.5; // Depth/Size
-                this.opacity = Math.random();
-                this.blinkSpeed = 0.005 + Math.random() * 0.01;
-                this.velocity = (Math.random() * 0.5) * 0.2; // Very slow drift
+            reset(initial = false) {
+                // Random position in a 3D volume
+                this.x = (Math.random() - 0.5) * width;
+                this.y = (Math.random() - 0.5) * height;
+                // Z depth
+                this.z = initial ? Math.random() * width : width;
+                this.pz = this.z; // Previous Z for trail calculation
             }
-
             update() {
-                // Blink effect
-                this.opacity += this.blinkSpeed;
-                if (this.opacity > 1 || this.opacity < 0) {
-                    this.blinkSpeed = -this.blinkSpeed;
+                this.z = this.z - (speed * 40); // Move closer
+                if (this.z < 1) {
+                    this.reset();
+                    this.z = width;
+                    this.pz = this.z;
                 }
-                
-                // Drift movement
-                this.y -= this.velocity; // Move up slowly
-                
-                // Reset if goes off screen
-                if (this.y < 0) this.y = height;
             }
-
             draw() {
+                // Perspective math
+                const sx = (this.x / this.z) * width/2 + width/2;
+                const sy = (this.y / this.z) * height/2 + height/2;
+                
+                // Radius based on depth
+                const r = (1 - this.z / width) * 4;
+
+                // Previous position for trail effect
+                const px = (this.x / this.pz) * width/2 + width/2;
+                const py = (this.y / this.pz) * height/2 + height/2;
+                this.pz = this.z;
+
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.z, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(this.opacity)})`;
-                ctx.shadowBlur = this.z * 2;
-                ctx.shadowColor = "white";
-                ctx.fill();
+                ctx.moveTo(px, py);
+                ctx.lineTo(sx, sy);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${1 - this.z/width})`;
+                ctx.lineWidth = r;
+                ctx.lineCap = 'round';
+                ctx.stroke();
             }
         }
 
-        // Create Star Array
-        const stars = [];
-        const starCount = 300; // Adjust for density
-        for(let i = 0; i < starCount; i++) {
-            stars.push(new Star());
-        }
+        for (let i = 0; i < numStars; i++) stars.push(new Star());
 
-        // Animation Loop
         function animate() {
-            // Clear screen with a slight fade trail for smoothness
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.5)'; // Matches body bg
+            // Leave trails by not clearing completely
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; 
             ctx.fillRect(0, 0, width, height);
-
+            
             stars.forEach(star => {
                 star.update();
                 star.draw();
             });
-
             requestAnimationFrame(animate);
         }
         animate();
 
 
-        // --- 2. The Pop-out Logic (Timer) ---
+        // --- 2. SEQUENCE LOGIC ---
         
-        // Start the loader line immediately
+        const introText = document.getElementById('intro-text');
+        const progress = document.getElementById('progress');
+        const introContainer = document.getElementById('intro');
+        const modal = document.getElementById('modal');
+
+        const messages = [
+            "INITIALIZING PROTOCOL...",
+            "ACCESSING NEURAL LINK...",
+            "DECRYPTING MESSAGE...",
+            "RENDERING REALITY...",
+            "ALMOST THERE..."
+        ];
+
+        let msgIndex = 0;
+
+        // Start Progress Bar
         setTimeout(() => {
-            document.getElementById('loader-line').classList.add('loading');
+            progress.style.width = '100%';
         }, 100);
 
-        // Trigger the message after 10 seconds (10000ms)
+        // Cycle Text Logic
+        const textInterval = setInterval(() => {
+            msgIndex++;
+            if(msgIndex < messages.length) {
+                // Glitch effect on text change
+                introText.style.opacity = 0;
+                setTimeout(() => {
+                    introText.innerText = messages[msgIndex];
+                    introText.style.opacity = 1;
+                }, 200);
+            }
+        }, 2000); // Change text every 2 seconds
+
+        // TRIGGER THE REVEAL AT 10 SECONDS
         setTimeout(() => {
-            const box = document.getElementById('message-box');
-            box.classList.add('reveal');
+            clearInterval(textInterval);
             
-            // Remove loader after reveal to clean up
-            const loader = document.getElementById('loader-line');
-            loader.style.opacity = '0';
+            // Hide Intro
+            introContainer.classList.add('hidden');
+            
+            // Show Modal with delay for smoothness
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 500);
+
         }, 10000);
 
     </script>
