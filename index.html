@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Singularity Event</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <title>Cosmic Event</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <style>
+        /* --- AESTHETICS --- */
         :root {
             --bg: #000000;
-            /* Deeper, darker glass */
-            --glass: rgba(5, 5, 5, 0.6);
-            --border: rgba(255, 255, 255, 0.1);
-            --highlight: rgba(255, 255, 255, 0.2);
+            --glass-surface: rgba(10, 10, 10, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-red: #ff003c;
+            --neon-blue: #00f0ff;
         }
 
         body {
             margin: 0;
-            background: var(--bg);
+            background-color: var(--bg);
             color: white;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
             height: 100vh;
             display: flex;
@@ -26,393 +27,431 @@
             justify-content: center;
         }
 
-        /* --- LAYERS --- */
         canvas {
             position: absolute;
             top: 0; left: 0;
             z-index: 1;
-            /* Initial state for chromatic distortion */
-            transition: filter 0.2s ease;
         }
 
-        /* Heavy Vignette for depth */
-        .vignette {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.8) 80%, black 100%);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        /* The White Flash */
-        .flash-bang {
+        /* Scanlines for retro-futurism */
+        .scanlines {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 99;
-            opacity: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
             pointer-events: none;
-            transition: opacity 1.5s ease-out;
+            z-index: 5;
+            opacity: 0.6;
         }
 
-        /* --- CSS ANIMATIONS --- */
-        .reality-tear {
-            /* The screen warping effect just before the drop */
-            filter: drop-shadow(-10px 0 rgba(255,0,0,0.8)) drop-shadow(10px 0 rgba(0,255,255,0.8)) blur(1px);
-            transform: scale(1.05);
-        }
-
-        .shake-hard {
-            animation: shakeHard 0.2s infinite;
-        }
-
-        @keyframes shakeHard {
-            0% { transform: translate(0px, 0px) rotate(0deg); }
-            20% { transform: translate(-10px, 5px) rotate(-1deg); }
-            40% { transform: translate(-5px, -10px) rotate(1deg); }
-            60% { transform: translate(10px, 10px) rotate(0deg); }
-            80% { transform: translate(5px, -5px) rotate(-1deg); }
-            100% { transform: translate(0px, 0px) rotate(0deg); }
-        }
-
-        /* --- INTRO UI --- */
-        .hud-layer {
-            z-index: 10;
+        /* --- HUD (Heads Up Display) --- */
+        .hud {
             position: absolute;
-            bottom: 10%;
-            text-align: center;
-            transition: all 0.5s ease;
-        }
-
-        .status-text {
-            font-size: 1rem;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            color: #fff;
-            text-shadow: 0 0 20px currentColor;
-            margin-bottom: 15px;
-            font-weight: 800;
-        }
-
-        .load-bar-container {
-            width: 300px;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        .load-bar-fill {
+            z-index: 10;
+            width: 100%;
             height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #fff, #aaa);
-            box-shadow: 0 0 25px white;
-            transition: width 10s cubic-bezier(0.25, 1, 0.5, 1); /* Eased for dramatic effect */
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 10px;
+        }
+
+        .hud-text {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+        }
+
+        .warning-box {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -150%);
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .warning-text {
+            color: var(--neon-red);
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            text-shadow: 0 0 20px var(--neon-red);
+            animation: blink 0.2s infinite;
         }
 
         /* --- THE FINAL CARD --- */
-        .ultraglass-card {
+        .glass-container {
             z-index: 50;
             position: relative;
-            padding: 6rem 8rem;
+            padding: 5rem 7rem;
             
-            /* Advanced Glassmorphism */
-            background: var(--glass);
-            box-shadow: 
-                0 50px 100px -20px rgba(0,0,0,1), /* Deep shadow */
-                inset 0 0 30px var(--highlight), /* Inner glow */
-                0 0 50px rgba(255,255,255,0.1); /* Outer aura */
-            backdrop-filter: blur(50px) brightness(0.8);
-            -webkit-backdrop-filter: blur(50px) brightness(0.8);
+            /* High-End Glassmorphism */
+            background: var(--glass-surface);
+            backdrop-filter: blur(40px) contrast(1.1);
+            -webkit-backdrop-filter: blur(40px) contrast(1.1);
             
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            border-top-color: var(--highlight);
-            border-left-color: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+
             opacity: 0;
-            transform: scale(0.7) translateY(50px) rotateX(20deg);
-            filter: blur(20px);
-            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(0.8) translateY(20px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .ultraglass-card.reveal {
+        .glass-container.visible {
             opacity: 1;
-            transform: scale(1) translateY(0) rotateX(0deg);
-            filter: blur(0px);
+            transform: scale(1) translateY(0);
         }
 
         h1 {
-            font-size: 7rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 6rem;
             font-weight: 900;
-            line-height: 0.85;
             margin: 0;
+            line-height: 0.9;
             text-transform: uppercase;
-            color: transparent;
-            background: linear-gradient(180deg, #fff 20%, #555 100%);
-            -webkit-background-clip: text;
+            color: white;
             
-            /* Aggressive Glitch Shadow */
-            text-shadow: 5px 0px 0px rgba(255,0,0,0.8), -5px 0px 0px rgba(0,255,255,0.8);
-            animation: textGlitch 0.2s infinite steps(2, end);
+            /* Chrome Text Effect */
+            background: linear-gradient(180deg, #fff 0%, #bbb 40%, #555 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
         }
 
-        .subtitle {
-            margin-top: 2rem;
-            font-size: 1rem;
-            letter-spacing: 8px;
-            color: rgba(255,255,255,0.6);
+        .sub-text {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.5em;
+            color: rgba(255,255,255,0.4);
             text-transform: uppercase;
-            font-weight: 800;
         }
 
-        @keyframes textGlitch {
-            0% { text-shadow: 5px 0px 0px rgba(255,0,0,0.8), -5px 0px 0px rgba(0,255,255,0.8); }
-            50% { text-shadow: -5px 2px 0px rgba(255,0,0,0.8), 5px -2px 0px rgba(0,255,255,0.8); transform: translate(-2px, 1px); }
-        }
-        
-        .hidden { opacity: 0; pointer-events: none; }
+        /* --- ANIMATIONS & FX --- */
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
 
+        .flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 99; opacity: 0; pointer-events: none;
+            transition: opacity 2s ease-out;
+        }
+
+        .shake { animation: shakeAnim 0.3s infinite; }
+        @keyframes shakeAnim {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .hidden { opacity: 0 !important; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <canvas id="cosmos"></canvas>
-    <div class="vignette"></div>
-    <div class="flash-bang" id="flash"></div>
+    <canvas id="deepspace"></canvas>
+    <div class="scanlines"></div>
+    <div class="flash-overlay" id="flash"></div>
 
-    <div class="hud-layer" id="hud">
-        <div class="status-text" id="status">Sequence Start</div>
-        <div class="load-bar-container">
-            <div class="load-bar-fill" id="bar-fill"></div>
+    <div class="hud" id="hud-layer">
+        <div class="hud-top">
+            <div class="hud-text">VELOCITY: <span id="vel-disp">WARP 1</span></div>
+            <div class="hud-text">SEC: <span id="timer-disp">10.00</span></div>
+        </div>
+        
+        <div class="warning-box" id="warning">
+            <div class="warning-text">SINGULARITY DETECTED</div>
+        </div>
+
+        <div class="hud-top" style="border-top: none; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px;">
+            <div class="hud-text">SYSTEM: OPTIMAL</div>
+            <div class="hud-text">TRAJECTORY: LOCKED</div>
         </div>
     </div>
 
-    <div class="ultraglass-card" id="final-card">
+    <div class="glass-container" id="final-card">
         <h1>Fuck You<br>Dude.</h1>
-        <div class="subtitle">Welcome to the void</div>
+        <div class="sub-text">End of Simulation</div>
     </div>
 
     <script>
-        const canvas = document.getElementById('cosmos');
+        /**
+         * ENGINE CONFIGURATION
+         */
+        const canvas = document.getElementById('deepspace');
         const ctx = canvas.getContext('2d');
-        let w, h;
+        let width, height, cx, cy;
 
-        // --- Configuration & State ---
-        let speed = 5;
-        let timeElapsed = 0; // ms
-        const totalTime = 10000; // 10s
-        let phase = 1; // 1=Cruise, 2=Planets, 3=Black Hole, 4=Done
+        // Assets Lists
+        let stars = [];
+        let galaxies = [];
+        let planets = [];
+        
+        // State
+        let timeStart = Date.now();
+        let speed = 20; // Base speed
+        let phase = 'STARS'; // STARS -> GALAXIES -> PLANETS -> HOLE -> DONE
+        let blackHoleScale = 0;
 
-        // Noise generator for shakes
-        const noise = () => Math.random() * 2 - 1;
-
+        // Resize Handler
         function resize() {
-            w = window.innerWidth;
-            h = window.innerHeight;
-            canvas.width = w;
-            canvas.height = h;
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            cx = width / 2;
+            cy = height / 2;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // --- OBJECTS ---
+        // --- CLASSES ---
 
-        // Star Class (Background noise)
         class Star {
             constructor() { this.reset(true); }
             reset(init = false) {
-                this.x = (Math.random() - 0.5) * w * 3; // Wider spread
-                this.y = (Math.random() - 0.5) * h * 3;
-                this.z = init ? Math.random() * w : w;
-                this.size = Math.random() * 2;
+                this.x = (Math.random() - 0.5) * width * 2;
+                this.y = (Math.random() - 0.5) * height * 2;
+                this.z = init ? Math.random() * 2000 : 2000;
+                this.size = Math.random();
             }
             update() {
                 this.z -= speed;
-                if (this.z <= 1) this.reset();
+                if(this.z <= 0) this.reset();
             }
-            draw(cx, cy) {
-                // Perspective calculation
-                let sx = (this.x / this.z) * w + cx;
-                let sy = (this.y / this.z) * w + cy;
-                let r = (1 - this.z / w) * this.size * 3;
-                let alpha = (1 - this.z / w);
-
-                if(phase === 3) { // Redshift near black hole
-                     ctx.fillStyle = `rgba(255, ${200 * alpha}, ${200 * alpha}, ${alpha})`;
-                } else {
-                     ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                }
-                ctx.beginPath();
-                ctx.arc(sx, sy, r, 0, Math.PI*2);
-                ctx.fill();
+            draw() {
+                let x = (this.x / this.z) * width + cx;
+                let y = (this.y / this.z) * width + cy;
+                let s = (1 - this.z / 2000) * 3 * this.size;
+                if(x < 0 || x > width || y < 0 || y > height) return;
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${1 - this.z/2000})`;
+                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI*2); ctx.fill();
             }
         }
 
-        // Planet Class (Passing objects)
-        class Planet {
-            constructor() { this.active = false; }
-            spawn() {
-                this.x = (Math.random() - 0.5) * w * 4; // Spawn far out
-                this.y = (Math.random() - 0.5) * h * 2;
-                this.z = w * 1.5; // Start further back
-                this.radius = 50 + Math.random() * 150;
-                // Random planet colors
-                const hue = Math.random() * 360;
-                this.color1 = `hsl(${hue}, 60%, 50%)`;
-                this.color2 = `hsl(${hue+30}, 70%, 10%)`;
-                this.active = true;
+        class Galaxy {
+            constructor() {
+                this.x = (Math.random() - 0.5) * width * 4; // Spawn wide
+                this.y = (Math.random() - 0.5) * height * 2;
+                this.z = 3000;
+                this.angle = Math.random() * Math.PI * 2;
+                this.color = Math.random() > 0.5 ? '#b088ff' : '#00f0ff'; // Purple or Cyan
             }
             update() {
-                if(!this.active) return;
-                this.z -= speed * 1.2; // Move slightly faster than stars
-                if (this.z <= 100 || this.x/this.z * w > w*2) this.active = false; // Cull
+                this.z -= speed;
+                this.angle += 0.05; // Rotate
             }
-            draw(cx, cy) {
-                if(!this.active || this.z < 100) return;
-                let sx = (this.x / this.z) * w + cx;
-                let sy = (this.y / this.z) * w + cy;
-                let r = (1 - this.z / (w*1.5)) * this.radius; // Scale based on depth
+            draw() {
+                if(this.z < 100) return;
+                let x = (this.x / this.z) * width + cx;
+                let y = (this.y / this.z) * width + cy;
+                let scale = (1 - this.z / 3000) * 100;
+                if(scale < 0) return;
 
-                // Faux-3D Gradient
-                let grad = ctx.createRadialGradient(sx - r/3, sy - r/3, r/10, sx, sy, r);
-                grad.addColorStop(0, this.color1);
-                grad.addColorStop(1, this.color2);
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(this.angle);
                 
+                // Draw Spiral Arms
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                
+                for(let i=0; i<3; i++) {
+                    ctx.rotate(Math.PI * 2 / 3);
+                    ctx.beginPath();
+                    ctx.ellipse(0, scale, scale/3, scale*2, 0, 0, Math.PI*2);
+                    ctx.stroke();
+                }
+                
+                // Core
+                ctx.fillStyle = 'white';
+                ctx.beginPath(); ctx.arc(0,0, scale/4, 0, Math.PI*2); ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        class Planet {
+            constructor() {
+                this.x = (Math.random() - 0.5) * width * 3;
+                this.y = (Math.random() - 0.5) * height * 2;
+                this.z = 3000;
+                this.radius = 100 + Math.random() * 200;
+                // Generate a random gradient color
+                this.hue = Math.floor(Math.random() * 360);
+            }
+            update() { this.z -= speed * 1.5; } // Planets move fast
+            draw() {
+                if(this.z < 50) return;
+                let x = (this.x / this.z) * width + cx;
+                let y = (this.y / this.z) * width + cy;
+                let r = (1 - this.z / 3000) * this.radius;
+                if(r < 0) return;
+
+                let grad = ctx.createRadialGradient(x-r/3, y-r/3, r/10, x, y, r);
+                grad.addColorStop(0, `hsl(${this.hue}, 100%, 70%)`);
+                grad.addColorStop(1, `hsl(${this.hue}, 100%, 10%)`);
+
                 ctx.beginPath();
-                ctx.arc(sx, sy, r, 0, Math.PI*2);
+                ctx.arc(x, y, r, 0, Math.PI*2);
                 ctx.fillStyle = grad;
-                // Atmospheric glow
-                ctx.shadowBlur = 30;
-                ctx.shadowColor = this.color1;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
                 ctx.fill();
                 ctx.shadowBlur = 0;
             }
         }
 
-        // --- INIT OBJECTS ---
-        const stars = Array(800).fill().map(() => new Star());
-        const planets = Array(5).fill().map(() => new Planet()); // Pool of 5 planets
+        // --- INITIALIZATION ---
+        for(let i=0; i<400; i++) stars.push(new Star());
 
-        // --- ANIMATION LOOP ---
-        let lastTime = 0;
-        function animate(timeStamp) {
-            const deltaTime = timeStamp - lastTime;
-            lastTime = timeStamp;
-            if(phase < 4) timeElapsed += deltaTime;
+        // --- MAIN LOOP ---
+        function loop() {
+            let now = Date.now();
+            let elapsed = now - timeStart;
+            let timeLeft = Math.max(0, (10000 - elapsed) / 1000);
 
-            // --- TIMELINE LOGIC ---
-            let shakeIntensity = 0;
-            let centerX = w/2;
-            let centerY = h/2;
-            let blackHoleSize = 0;
+            // Update HUD
+            document.getElementById('timer-disp').innerText = timeLeft.toFixed(2);
 
-            if (timeElapsed < 4000) {
-                // Phase 1: Cruise
-                phase = 1; speed = 10;
-                document.getElementById('status').innerText = "Interstellar Cruise";
-            } else if (timeElapsed < 7500) {
-                // Phase 2: Planets & Acceleration
-                phase = 2;
-                speed += 0.5; // Accelerate
-                if(Math.random() > 0.97) { // Randomly spawn planets
-                    const available = planets.find(p => !p.active);
-                    if(available) available.spawn();
+            // --- PHASE CONTROLLER ---
+            // 0s - 3s: Stars only
+            if (elapsed > 3000 && elapsed < 6000) {
+                if(phase !== 'GALAXIES') {
+                    phase = 'GALAXIES';
+                    document.getElementById('vel-disp').innerText = "HYPERSPACE";
                 }
-                shakeIntensity = 1;
-                document.getElementById('status').innerText = "Entering System / accelerating";
-            } else if (timeElapsed < 9900) {
-                // Phase 3: Black Hole Approach
-                phase = 3;
-                speed += 2; // Rapid acceleration
-                shakeIntensity = 5 + (timeElapsed - 7500) / 200; // Increasing shake
-                blackHoleSize = (timeElapsed - 7500) / 5; // Growing black hole
-                document.getElementById('status').innerText = "WARNING: EVENT HORIZON";
-                document.getElementById('status').style.color = "red";
-            } else if (timeElapsed >= 10000 && phase !== 4) {
-                triggerDrop();
+                // Spawn Galaxies randomly
+                if(Math.random() > 0.95) galaxies.push(new Galaxy());
             }
 
-            // Apply Shake to center point
-            if(shakeIntensity > 0) {
-                centerX += noise() * shakeIntensity;
-                centerY += noise() * shakeIntensity;
+            // 6s - 8s: Planets
+            if (elapsed > 6000 && elapsed < 8000) {
+                if(phase !== 'PLANETS') {
+                    phase = 'PLANETS';
+                    speed = 40; // Speed up
+                    document.getElementById('vel-disp').innerText = "MAXIMUM";
+                }
+                // Spawn Planets randomly
+                if(Math.random() > 0.92) planets.push(new Planet());
+            }
+
+            // 8s - 10s: Black Hole
+            if (elapsed > 8000 && elapsed < 10000) {
+                if(phase !== 'HOLE') {
+                    phase = 'HOLE';
+                    speed = 80; // Ludicrous speed
+                    document.getElementById('warning').style.opacity = 1;
+                    document.body.classList.add('shake');
+                    // Create redness
+                    document.documentElement.style.setProperty('--neon-blue', '#ff0000');
+                }
+                blackHoleScale += 0.5; // Grow the hole
+            }
+
+            // 10s: THE DROP
+            if (elapsed >= 10000) {
+                if(phase !== 'DONE') {
+                    phase = 'DONE';
+                    triggerEnd();
+                }
+                return; // Stop animation loop
             }
 
             // --- DRAWING ---
-            // Clear with trail effect
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.fillRect(0, 0, w, h);
-            ctx.globalCompositeOperation = 'lighter'; // Make things glow
-
-            // Draw Stars
-            stars.forEach(s => { s.update(); s.draw(centerX, centerY); });
-            // Draw Planets
-            planets.forEach(p => { p.update(); p.draw(centerX, centerY); });
-
-            // Draw Black Hole (Phase 3)
-            if (phase === 3) {
-                 ctx.globalCompositeOperation = 'source-over';
-                 // The Singularity (Black center)
-                 ctx.beginPath();
-                 ctx.arc(centerX, centerY, blackHoleSize, 0, Math.PI*2);
-                 ctx.fillStyle = "#000";
-                 ctx.fill();
-                 
-                 // The Accretion Disk (Glowing Ring)
-                 ctx.beginPath();
-                 ctx.arc(centerX, centerY, blackHoleSize * 1.2, 0, Math.PI*2);
-                 ctx.lineWidth = 10 + noise() * 5;
-                 ctx.strokeStyle = `rgba(255, 100, 50, ${Math.random() * 0.5 + 0.5})`;
-                 ctx.shadowColor = 'red';
-                 ctx.shadowBlur = 50;
-                 ctx.stroke();
-                 ctx.shadowBlur = 0;
-            }
             
-            ctx.globalCompositeOperation = 'source-over'; // Reset
+            // 1. Clear Screen (with trail effect for speed)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 0, width, height);
 
-            if(phase < 4) requestAnimationFrame(animate);
+            // 2. Draw Stars
+            stars.forEach(s => { s.update(); s.draw(); });
+
+            // 3. Draw Galaxies
+            galaxies.forEach((g, i) => {
+                g.update();
+                g.draw();
+                if(g.z < 0) galaxies.splice(i, 1);
+            });
+
+            // 4. Draw Planets
+            planets.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if(p.z < 0) planets.splice(i, 1);
+            });
+
+            // 5. Draw Black Hole (Overlay)
+            if(phase === 'HOLE') {
+                const radius = (elapsed - 8000) / 4; // Grow size
+                
+                // Accretion Disk
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius * 1.5, 0, Math.PI*2);
+                ctx.strokeStyle = 'orange';
+                ctx.lineWidth = 10;
+                ctx.shadowBlur = 50;
+                ctx.shadowColor = 'red';
+                ctx.stroke();
+
+                // The Event Horizon (Black)
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            requestAnimationFrame(loop);
         }
 
-
-        // --- THE DROP SEQUENCE ---
-        function triggerDrop() {
-            phase = 4;
-            const body = document.body;
-            const canvasEl = document.getElementById('cosmos');
+        function triggerEnd() {
+            // Flash White
             const flash = document.getElementById('flash');
-            const hud = document.getElementById('hud');
-            const card = document.getElementById('final-card');
+            flash.style.opacity = 1;
 
-            // 1. Reality Tear (Last 100ms before drop)
-            canvasEl.classList.add('reality-tear');
-            body.classList.add('shake-hard');
+            // Clean up UI
+            document.body.classList.remove('shake');
+            document.getElementById('hud-layer').classList.add('hidden');
+            canvas.style.display = 'none';
 
             setTimeout(() => {
-                // 2. The Flash
-                flash.style.opacity = 1;
-                
-                // 3. Cleanup & Reveal
-                setTimeout(() => {
-                    canvasEl.style.display = 'none'; // Kill canvas
-                    body.classList.remove('shake-hard');
-                    hud.classList.add('hidden');
-                    flash.style.opacity = 0; // Fade out flash
-                    
-                    // Show Card
-                    card.classList.add('reveal');
-                }, 200);
-            }, 100);
+                flash.style.opacity = 0;
+                // Reveal Card
+                document.getElementById('final-card').classList.add('visible');
+            }, 1000);
         }
 
         // Start
-        setTimeout(() => {
-             document.getElementById('bar-fill').style.width = '100%';
-             animate(0);
-        }, 100);
+        loop();
 
     </script>
 </body>
