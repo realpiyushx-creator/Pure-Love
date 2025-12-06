@@ -3,47 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Void Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+    <title>Incoming Transmission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        /* --- 1. CORE AESTHETICS --- */
+        /* --- CORE CONFIG --- */
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-blur: blur(25px);
-            --neon-white: 0 0 15px rgba(255, 255, 255, 0.6);
+            --bg: #000000;
+            --glass: rgba(20, 20, 20, 0.4);
+            --border: rgba(255, 255, 255, 0.15);
+            --glow: 0 0 20px rgba(255, 255, 255, 0.5);
+            --accent: #ffffff;
         }
 
         body {
             margin: 0;
+            background: var(--bg);
+            color: white;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
-            background-color: #000000;
-            font-family: 'Space Grotesk', sans-serif;
             height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            color: white;
+            justify-content: center;
         }
 
-        /* Scanline / Grain Overlay for that "Retro-Future" vibe */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 5;
-        }
-
+        /* --- BACKGROUND FX --- */
         canvas {
             position: absolute;
             top: 0;
@@ -51,131 +35,169 @@
             z-index: 1;
         }
 
-        /* --- 2. INTRO SEQUENCE (0-10s) --- */
-        .intro-container {
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 40%, black 120%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Screen Shake Animation Class */
+        .shake-screen {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* --- THE TIMER / INTRO --- */
+        .intro-layer {
             z-index: 10;
             position: absolute;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .intro-layer.hidden {
+            opacity: 0;
             pointer-events: none;
-            transition: opacity 1s ease;
         }
 
-        .intro-text {
-            font-size: 1.2rem;
+        .countdown-text {
+            font-size: 0.8rem;
             letter-spacing: 0.5em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.7);
-            animation: glitch 2s infinite;
+            color: #666;
+            margin-bottom: 20px;
         }
 
-        .timer-line {
-            width: 200px;
-            height: 1px;
-            background: #333;
-            margin: 20px auto 0;
+        .progress-bar {
+            width: 300px;
+            height: 2px;
+            background: #111;
             position: relative;
             overflow: hidden;
         }
 
-        .timer-fill {
+        .progress-fill {
             position: absolute;
             left: 0;
             top: 0;
             height: 100%;
             background: white;
             width: 0%;
-            transition: width 10s linear;
-            box-shadow: 0 0 10px white;
+            box-shadow: 0 0 15px white;
+            transition: width 10s linear; /* The 10s timer */
         }
 
-        /* --- 3. THE FINAL GLASS CARD --- */
-        .glass-modal {
+        /* --- THE REVEAL CARD --- */
+        .glass-card {
             z-index: 20;
             position: relative;
-            padding: 5rem 8rem;
+            padding: 5rem 7rem;
             
-            /* The "Premium Glass" Effect */
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            border-radius: 4px; /* Sharp corners for modern look, or use 30px for soft */
-            
-            opacity: 0;
-            transform: scale(1.1) rotateX(10deg);
-            filter: blur(10px);
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Ultra Glass */
+            background: var(--glass);
+            backdrop-filter: blur(40px) brightness(1.2);
+            -webkit-backdrop-filter: blur(40px) brightness(1.2);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255,255,255,0.3);
+            border-radius: 2px;
             
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        .glass-modal.active {
-            opacity: 1;
-            transform: scale(1) rotateX(0deg);
-            filter: blur(0px);
-        }
-
-        .glass-modal h1 {
-            font-size: 5rem;
-            margin: 0;
-            line-height: 1;
-            font-weight: 700;
             text-align: center;
+
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.2s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card.boom {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 100px rgba(255, 255, 255, 0.15);
+        }
+
+        /* GLITCH TEXT EFFECT */
+        h1 {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 0.9;
+            margin: 0;
             text-transform: uppercase;
-            
-            /* Cool Metal/White Gradient Text */
-            background: linear-gradient(180deg, #ffffff 0%, #aaaaaa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
+            color: white;
+            position: relative;
+            text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #00ffff;
+            animation: glitch-anim 3s infinite linear alternate-reverse;
         }
 
-        .glass-modal p {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 2px;
+        .sub {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            color: rgba(255,255,255,0.5);
             text-transform: uppercase;
         }
 
-        /* --- Utility Classes --- */
-        .hidden {
-            opacity: 0 !important;
+        @keyframes glitch-anim {
+            0% { text-shadow: 2px 2px 0px #ff0055, -2px -2px 0px #00ffff; }
+            2% { text-shadow: -2px 1px 0px #ff0055, 1px -2px 0px #00ffff; transform: translate(2px,0); }
+            4% { text-shadow: 2px -1px 0px #ff0055, -2px 2px 0px #00ffff; transform: translate(-2px,0); }
+            6% { text-shadow: 0px 0px 0px transparent; transform: translate(0,0); }
+            100% { text-shadow: 0px 0px 0px transparent; transform: translate(0,0); }
         }
 
+        /* Flash Effect */
+        .flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+            transition: opacity 1s ease-out;
+        }
     </style>
 </head>
 <body>
 
-    <div class="overlay"></div>
-    <canvas id="warpCanvas"></canvas>
+    <div class="vignette"></div>
+    <div class="flash-overlay" id="flash"></div>
+    <canvas id="universe"></canvas>
 
-    <div class="intro-container" id="intro">
-        <div class="intro-text" id="intro-text">INITIALIZING...</div>
-        <div class="timer-line">
-            <div class="timer-fill" id="progress"></div>
+    <div class="intro-layer" id="intro">
+        <div class="countdown-text" id="status-text">System Normal</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="fill"></div>
         </div>
     </div>
 
-    <div class="glass-modal" id="modal">
-        <h1>Fuck you<br>dude.</h1>
-        <p>With love from the universe</p>
+    <div class="glass-card" id="card">
+        <h1>Fuck You<br>Dude.</h1>
+        <div class="sub">Have a nice day</div>
     </div>
 
     <script>
-        // --- 1. 3D WARP SPEED ANIMATION ---
-        const canvas = document.getElementById('warpCanvas');
+        // --- CANVAS SETUP ---
+        const canvas = document.getElementById('universe');
         const ctx = canvas.getContext('2d');
         let width, height;
-
-        let stars = [];
-        const numStars = 600;
-        const speed = 0.2; // Speed of the warp
+        
+        let phase = 'WARP'; // 'WARP' or 'EXPLODE'
+        let speedMultiplier = 1;
 
         function resize() {
             width = window.innerWidth;
@@ -186,56 +208,91 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // --- STAR SYSTEM ---
+        const stars = [];
+        const numStars = 800;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
         class Star {
             constructor() {
-                this.reset(true);
+                this.init();
             }
-            reset(initial = false) {
-                // Random position in a 3D volume
-                this.x = (Math.random() - 0.5) * width;
-                this.y = (Math.random() - 0.5) * height;
-                // Z depth
-                this.z = initial ? Math.random() * width : width;
-                this.pz = this.z; // Previous Z for trail calculation
+
+            init() {
+                this.x = (Math.random() - 0.5) * width * 2; // Wide spread
+                this.y = (Math.random() - 0.5) * height * 2;
+                this.z = Math.random() * width; 
+                this.pz = this.z;
             }
+
             update() {
-                this.z = this.z - (speed * 40); // Move closer
-                if (this.z < 1) {
-                    this.reset();
-                    this.z = width;
-                    this.pz = this.z;
+                if (phase === 'WARP') {
+                    // Move towards camera (decrease Z)
+                    // Speed increases based on the multiplier
+                    this.z -= (10 * speedMultiplier);
+                    
+                    if (this.z <= 0) {
+                        this.z = width;
+                        this.pz = this.z;
+                        this.x = (Math.random() - 0.5) * width * 2;
+                        this.y = (Math.random() - 0.5) * height * 2;
+                    }
+                } else if (phase === 'EXPLODE') {
+                    // Move OUTWARDS from center
+                    // We interpret x,y as vectors from center now
+                    this.z -= 5; // Slow drift Z
+                    // Explode outward logic is purely visual in draw for this style
                 }
             }
-            draw() {
-                // Perspective math
-                const sx = (this.x / this.z) * width/2 + width/2;
-                const sy = (this.y / this.z) * height/2 + height/2;
-                
-                // Radius based on depth
-                const r = (1 - this.z / width) * 4;
 
-                // Previous position for trail effect
-                const px = (this.x / this.pz) * width/2 + width/2;
-                const py = (this.y / this.pz) * height/2 + height/2;
-                this.pz = this.z;
+            draw() {
+                const x = this.x;
+                const y = this.y;
+                const z = this.z;
+
+                // 3D Projection
+                const sx = (x / z) * width + width/2;
+                const sy = (y / z) * width + height/2;
+
+                // Previous position (for trails)
+                const px = (x / this.pz) * width + width/2;
+                const py = (y / this.pz) * width + height/2;
+
+                this.pz = z;
+
+                if (sx < 0 || sx > width || sy < 0 || sy > height) return;
+
+                const size = (1 - z / width) * 4;
+                const alpha = (1 - z / width);
 
                 ctx.beginPath();
                 ctx.moveTo(px, py);
                 ctx.lineTo(sx, sy);
-                ctx.strokeStyle = `rgba(255, 255, 255, ${1 - this.z/width})`;
-                ctx.lineWidth = r;
+                ctx.lineWidth = size;
+                
+                if (phase === 'WARP') {
+                    // Blue/White tint during warp
+                    ctx.strokeStyle = `rgba(200, 220, 255, ${alpha})`;
+                } else {
+                    // White/Red chaotic tint during explode
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                }
+                
                 ctx.lineCap = 'round';
                 ctx.stroke();
             }
         }
 
-        for (let i = 0; i < numStars; i++) stars.push(new Star());
+        // Initialize stars
+        for(let i=0; i<numStars; i++) stars.push(new Star());
 
+        // --- ANIMATION LOOP ---
         function animate() {
-            // Leave trails by not clearing completely
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; 
+            // Motion Blur Trail Effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'; 
             ctx.fillRect(0, 0, width, height);
-            
+
             stars.forEach(star => {
                 star.update();
                 star.draw();
@@ -245,52 +302,57 @@
         animate();
 
 
-        // --- 2. SEQUENCE LOGIC ---
-        
-        const introText = document.getElementById('intro-text');
-        const progress = document.getElementById('progress');
-        const introContainer = document.getElementById('intro');
-        const modal = document.getElementById('modal');
+        // --- LOGIC CONTROLLER ---
+        const fill = document.getElementById('fill');
+        const status = document.getElementById('status-text');
+        const intro = document.getElementById('intro');
+        const card = document.getElementById('card');
+        const flash = document.getElementById('flash');
+        const body = document.body;
 
-        const messages = [
-            "INITIALIZING PROTOCOL...",
-            "ACCESSING NEURAL LINK...",
-            "DECRYPTING MESSAGE...",
-            "RENDERING REALITY...",
-            "ALMOST THERE..."
-        ];
-
-        let msgIndex = 0;
-
-        // Start Progress Bar
+        // 1. Start Progress Bar
         setTimeout(() => {
-            progress.style.width = '100%';
+            fill.style.width = '100%';
         }, 100);
 
-        // Cycle Text Logic
-        const textInterval = setInterval(() => {
-            msgIndex++;
-            if(msgIndex < messages.length) {
-                // Glitch effect on text change
-                introText.style.opacity = 0;
-                setTimeout(() => {
-                    introText.innerText = messages[msgIndex];
-                    introText.style.opacity = 1;
-                }, 200);
+        // 2. Accelerate the Warp (0-10s)
+        let time = 0;
+        const accelerator = setInterval(() => {
+            time += 100;
+            // Linearly increase speed multiplier
+            speedMultiplier = 1 + (time / 1000) * 1.5; 
+            
+            // Update Text
+            if (time === 2000) status.innerText = "Target Locked";
+            if (time === 5000) status.innerText = "Velocity Max";
+            if (time === 8000) {
+                status.innerText = "Brace for Impact";
+                status.style.color = "#fff";
+                status.style.textShadow = "0 0 10px white";
             }
-        }, 2000); // Change text every 2 seconds
+        }, 100);
 
-        // TRIGGER THE REVEAL AT 10 SECONDS
+        // 3. THE DROP (10s)
         setTimeout(() => {
-            clearInterval(textInterval);
+            clearInterval(accelerator);
             
+            // Visual FX
+            phase = 'EXPLODE'; // Stops the warp loop logic
+            
+            // Flash Screen
+            flash.style.opacity = '0.8';
+            setTimeout(() => { flash.style.opacity = '0'; }, 100);
+
             // Hide Intro
-            introContainer.classList.add('hidden');
-            
-            // Show Modal with delay for smoothness
+            intro.classList.add('hidden');
+
+            // Screen Shake
+            body.classList.add('shake-screen');
+
+            // Show Card (Boom)
             setTimeout(() => {
-                modal.classList.add('active');
-            }, 500);
+                card.classList.add('boom');
+            }, 200); // Slight delay so the flash hits first
 
         }, 10000);
 
