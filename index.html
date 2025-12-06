@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Event</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <title>Cosmic Realism</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;600&display=swap" rel="stylesheet">
     <style>
-        /* --- AESTHETICS --- */
         :root {
             --bg: #000000;
-            --glass-surface: rgba(10, 10, 10, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --neon-red: #ff003c;
-            --neon-blue: #00f0ff;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --neon: #00f3ff;
+            --danger: #ff004c;
         }
 
         body {
             margin: 0;
-            background-color: var(--bg);
+            background: var(--bg);
             color: white;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Rajdhani', sans-serif;
             overflow: hidden;
             height: 100vh;
             display: flex;
@@ -27,205 +26,178 @@
             justify-content: center;
         }
 
+        /* --- LAYERS --- */
         canvas {
             position: absolute;
             top: 0; left: 0;
             z-index: 1;
         }
 
-        /* Scanlines for retro-futurism */
-        .scanlines {
+        /* Cinematic Vignette */
+        .vignette {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-            background-size: 100% 4px;
+            background: radial-gradient(circle, transparent 30%, black 100%);
+            z-index: 2;
             pointer-events: none;
-            z-index: 5;
-            opacity: 0.6;
         }
 
-        /* --- HUD (Heads Up Display) --- */
+        /* Noise/Grain */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); /* Subtle noise gif */
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* --- HUD --- */
         .hud {
             position: absolute;
             z-index: 10;
             width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
             padding: 40px;
             box-sizing: border-box;
-            transition: opacity 0.5s ease;
-        }
-
-        .hud-top {
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 10px;
+            top: 0;
         }
 
-        .hud-text {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 0.7rem;
+        .hud-item {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--neon);
+            text-shadow: 0 0 10px var(--neon);
             letter-spacing: 2px;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
         }
 
-        .warning-box {
+        .timer-big {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -150%);
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .warning-text {
-            color: var(--neon-red);
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
             font-size: 2rem;
-            text-shadow: 0 0 20px var(--neon-red);
-            animation: blink 0.2s infinite;
+            color: rgba(255,255,255,0.5);
+            z-index: 10;
         }
 
-        /* --- THE FINAL CARD --- */
-        .glass-container {
+        /* --- THE REVEAL --- */
+        .glass-panel {
             z-index: 50;
             position: relative;
-            padding: 5rem 7rem;
+            padding: 6rem 8rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
             
-            /* High-End Glassmorphism */
-            background: var(--glass-surface);
-            backdrop-filter: blur(40px) contrast(1.1);
-            -webkit-backdrop-filter: blur(40px) contrast(1.1);
-            
-            border: 1px solid var(--glass-border);
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            box-shadow: 0 0 100px rgba(0,0,0,0.9);
-
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-
+            
             opacity: 0;
-            transform: scale(0.8) translateY(20px);
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.8);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .glass-container.visible {
+        .glass-panel.show {
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
 
         h1 {
-            font-family: 'Inter', sans-serif;
-            font-size: 6rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
             font-weight: 900;
             margin: 0;
-            line-height: 0.9;
+            line-height: 1;
             text-transform: uppercase;
-            color: white;
-            
-            /* Chrome Text Effect */
-            background: linear-gradient(180deg, #fff 0%, #bbb 40%, #555 100%);
+            background: linear-gradient(45deg, #fff, #aaa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            text-shadow: 0 10px 30px rgba(0,0,0,1);
         }
 
-        .sub-text {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            letter-spacing: 0.5em;
-            color: rgba(255,255,255,0.4);
+        .sub {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: var(--neon);
             text-transform: uppercase;
         }
 
-        /* --- ANIMATIONS & FX --- */
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-
-        .flash-overlay {
+        /* --- FX --- */
+        .flash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 99; opacity: 0; pointer-events: none;
+            background: white; z-index: 100; opacity: 0; pointer-events: none;
             transition: opacity 2s ease-out;
         }
 
-        .shake { animation: shakeAnim 0.3s infinite; }
-        @keyframes shakeAnim {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
-        }
-
-        .hidden { opacity: 0 !important; pointer-events: none; }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both infinite; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body>
 
-    <canvas id="deepspace"></canvas>
-    <div class="scanlines"></div>
-    <div class="flash-overlay" id="flash"></div>
+    <div class="flash" id="flash-screen"></div>
+    <div class="vignette"></div>
+    <div class="noise"></div>
+    <canvas id="space"></canvas>
 
-    <div class="hud" id="hud-layer">
-        <div class="hud-top">
-            <div class="hud-text">VELOCITY: <span id="vel-disp">WARP 1</span></div>
-            <div class="hud-text">SEC: <span id="timer-disp">10.00</span></div>
-        </div>
-        
-        <div class="warning-box" id="warning">
-            <div class="warning-text">SINGULARITY DETECTED</div>
-        </div>
-
-        <div class="hud-top" style="border-top: none; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px;">
-            <div class="hud-text">SYSTEM: OPTIMAL</div>
-            <div class="hud-text">TRAJECTORY: LOCKED</div>
-        </div>
+    <div class="hud" id="hud-ui">
+        <div class="hud-item">SYS: ONLINE</div>
+        <div class="hud-item" id="warn" style="color: var(--danger); opacity: 0;">WARNING: GRAVITY WELL</div>
+        <div class="hud-item">LOC: DEEP VOID</div>
     </div>
 
-    <div class="glass-container" id="final-card">
+    <div class="timer-big" id="timer">10.00</div>
+
+    <div class="glass-panel" id="card">
         <h1>Fuck You<br>Dude.</h1>
-        <div class="sub-text">End of Simulation</div>
+        <div class="sub">From the cosmos</div>
     </div>
 
     <script>
-        /**
-         * ENGINE CONFIGURATION
-         */
-        const canvas = document.getElementById('deepspace');
+        const canvas = document.getElementById('space');
         const ctx = canvas.getContext('2d');
-        let width, height, cx, cy;
+        let w, h, cx, cy;
 
-        // Assets Lists
-        let stars = [];
-        let galaxies = [];
-        let planets = [];
+        // --- ASSET LOADER ---
+        // Using Wikimedia/NASA URLs (High reliability)
+        const assets = {
+            galaxy: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/NGC_4414_%28NASA-med%29.jpg/800px-NGC_4414_%28NASA-med%29.jpg",
+            earth: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1024px-The_Earth_seen_from_Apollo_17.jpg",
+            jupiter: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/800px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg",
+            saturn: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg",
+            blackhole: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Black_Hole_Milkyway.jpg/800px-Black_Hole_Milkyway.jpg" // Abstract representation
+        };
+
+        const loadedImages = {};
         
-        // State
-        let timeStart = Date.now();
-        let speed = 20; // Base speed
-        let phase = 'STARS'; // STARS -> GALAXIES -> PLANETS -> HOLE -> DONE
-        let blackHoleScale = 0;
+        // Preload images logic
+        Object.keys(assets).forEach(key => {
+            const img = new Image();
+            img.src = assets[key];
+            loadedImages[key] = img;
+        });
 
-        // Resize Handler
         function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            cx = width / 2;
-            cy = height / 2;
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
+            cx = w / 2;
+            cy = h / 2;
         }
         window.addEventListener('resize', resize);
         resize();
@@ -234,224 +206,159 @@
 
         class Star {
             constructor() { this.reset(true); }
-            reset(init = false) {
-                this.x = (Math.random() - 0.5) * width * 2;
-                this.y = (Math.random() - 0.5) * height * 2;
+            reset(init) {
+                this.x = (Math.random() - 0.5) * w * 2;
+                this.y = (Math.random() - 0.5) * h * 2;
                 this.z = init ? Math.random() * 2000 : 2000;
-                this.size = Math.random();
+                this.size = Math.random() * 2;
             }
-            update() {
+            update(speed) {
                 this.z -= speed;
                 if(this.z <= 0) this.reset();
             }
             draw() {
-                let x = (this.x / this.z) * width + cx;
-                let y = (this.y / this.z) * width + cy;
+                let x = (this.x / this.z) * w + cx;
+                let y = (this.y / this.z) * w + cy;
                 let s = (1 - this.z / 2000) * 3 * this.size;
-                if(x < 0 || x > width || y < 0 || y > height) return;
+                if(x<0 || x>w || y<0 || y>h) return;
                 
-                ctx.fillStyle = `rgba(255, 255, 255, ${1 - this.z/2000})`;
-                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = `rgba(255,255,255, ${1 - this.z/2000})`;
+                ctx.beginPath(); ctx.arc(x,y,s,0,Math.PI*2); ctx.fill();
             }
         }
 
-        class Galaxy {
-            constructor() {
-                this.x = (Math.random() - 0.5) * width * 4; // Spawn wide
-                this.y = (Math.random() - 0.5) * height * 2;
-                this.z = 3000;
-                this.angle = Math.random() * Math.PI * 2;
-                this.color = Math.random() > 0.5 ? '#b088ff' : '#00f0ff'; // Purple or Cyan
+        class CelestialBody {
+            constructor(type, imgKey) {
+                this.type = type; // 'galaxy' or 'planet'
+                this.img = loadedImages[imgKey];
+                this.x = (Math.random() - 0.5) * w * 4;
+                this.y = (Math.random() - 0.5) * h * 2;
+                this.z = 3000; // Far start
+                this.angle = Math.random() * Math.PI;
+                this.rotSpeed = (Math.random() - 0.5) * 0.02;
             }
-            update() {
+            update(speed) {
                 this.z -= speed;
-                this.angle += 0.05; // Rotate
+                this.angle += this.rotSpeed;
             }
             draw() {
-                if(this.z < 100) return;
-                let x = (this.x / this.z) * width + cx;
-                let y = (this.y / this.z) * width + cy;
-                let scale = (1 - this.z / 3000) * 100;
+                if(!this.img || this.z < 100) return;
+                
+                let x = (this.x / this.z) * w + cx;
+                let y = (this.y / this.z) * w + cy;
+                let scale = (1 - this.z / 3000);
+                let size = (this.type === 'galaxy' ? 600 : 300) * scale;
+                
                 if(scale < 0) return;
 
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(this.angle);
                 
-                // Draw Spiral Arms
-                ctx.strokeStyle = this.color;
-                ctx.lineWidth = 2;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
+                // COOL TRICK: 'screen' blending makes black backgrounds transparent
+                // This allows us to use JPEGs of planets/space without ugly boxes
+                ctx.globalCompositeOperation = 'screen'; 
+                ctx.globalAlpha = scale;
                 
-                for(let i=0; i<3; i++) {
-                    ctx.rotate(Math.PI * 2 / 3);
-                    ctx.beginPath();
-                    ctx.ellipse(0, scale, scale/3, scale*2, 0, 0, Math.PI*2);
-                    ctx.stroke();
-                }
-                
-                // Core
-                ctx.fillStyle = 'white';
-                ctx.beginPath(); ctx.arc(0,0, scale/4, 0, Math.PI*2); ctx.fill();
-                
+                try {
+                    ctx.drawImage(this.img, -size/2, -size/2, size, size);
+                } catch(e) {} // Prevent crash if image not loaded
+
                 ctx.restore();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1;
             }
         }
 
-        class Planet {
-            constructor() {
-                this.x = (Math.random() - 0.5) * width * 3;
-                this.y = (Math.random() - 0.5) * height * 2;
-                this.z = 3000;
-                this.radius = 100 + Math.random() * 200;
-                // Generate a random gradient color
-                this.hue = Math.floor(Math.random() * 360);
+        // --- STATE ---
+        const stars = Array(600).fill().map(() => new Star());
+        const bodies = [];
+        let startTime = Date.now();
+        let speed = 20;
+        let phase = 0; // 0=Stars, 1=Galaxies, 2=Planets, 3=Hole
+        
+        function animate() {
+            let elapsed = Date.now() - startTime;
+            let timeLeft = Math.max(0, 10 - elapsed/1000).toFixed(2);
+            document.getElementById('timer').innerText = timeLeft;
+
+            // --- TIMELINE ---
+            // 3s: Galaxies
+            if(elapsed > 3000 && phase === 0) {
+                phase = 1;
+                // Add Galaxies
+                for(let i=0; i<3; i++) bodies.push(new CelestialBody('galaxy', 'galaxy'));
             }
-            update() { this.z -= speed * 1.5; } // Planets move fast
-            draw() {
-                if(this.z < 50) return;
-                let x = (this.x / this.z) * width + cx;
-                let y = (this.y / this.z) * width + cy;
-                let r = (1 - this.z / 3000) * this.radius;
-                if(r < 0) return;
-
-                let grad = ctx.createRadialGradient(x-r/3, y-r/3, r/10, x, y, r);
-                grad.addColorStop(0, `hsl(${this.hue}, 100%, 70%)`);
-                grad.addColorStop(1, `hsl(${this.hue}, 100%, 10%)`);
-
-                ctx.beginPath();
-                ctx.arc(x, y, r, 0, Math.PI*2);
-                ctx.fillStyle = grad;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            // 6s: Solar System
+            if(elapsed > 6000 && phase === 1) {
+                phase = 2;
+                speed = 40;
+                // Add Planets
+                bodies.push(new CelestialBody('planet', 'saturn'));
+                setTimeout(() => bodies.push(new CelestialBody('planet', 'jupiter')), 500);
+                setTimeout(() => bodies.push(new CelestialBody('planet', 'earth')), 1000);
             }
-        }
-
-        // --- INITIALIZATION ---
-        for(let i=0; i<400; i++) stars.push(new Star());
-
-        // --- MAIN LOOP ---
-        function loop() {
-            let now = Date.now();
-            let elapsed = now - timeStart;
-            let timeLeft = Math.max(0, (10000 - elapsed) / 1000);
-
-            // Update HUD
-            document.getElementById('timer-disp').innerText = timeLeft.toFixed(2);
-
-            // --- PHASE CONTROLLER ---
-            // 0s - 3s: Stars only
-            if (elapsed > 3000 && elapsed < 6000) {
-                if(phase !== 'GALAXIES') {
-                    phase = 'GALAXIES';
-                    document.getElementById('vel-disp').innerText = "HYPERSPACE";
-                }
-                // Spawn Galaxies randomly
-                if(Math.random() > 0.95) galaxies.push(new Galaxy());
+            // 8s: Black Hole Approach
+            if(elapsed > 8000 && phase === 2) {
+                phase = 3;
+                speed = 100; // Warp speed
+                document.getElementById('warn').style.opacity = 1;
+                document.body.classList.add('shake');
+            }
+            // 10s: Drop
+            if(elapsed > 10000) {
+                finish();
+                return;
             }
 
-            // 6s - 8s: Planets
-            if (elapsed > 6000 && elapsed < 8000) {
-                if(phase !== 'PLANETS') {
-                    phase = 'PLANETS';
-                    speed = 40; // Speed up
-                    document.getElementById('vel-disp').innerText = "MAXIMUM";
-                }
-                // Spawn Planets randomly
-                if(Math.random() > 0.92) planets.push(new Planet());
-            }
+            // --- DRAW ---
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, w, h);
 
-            // 8s - 10s: Black Hole
-            if (elapsed > 8000 && elapsed < 10000) {
-                if(phase !== 'HOLE') {
-                    phase = 'HOLE';
-                    speed = 80; // Ludicrous speed
-                    document.getElementById('warning').style.opacity = 1;
-                    document.body.classList.add('shake');
-                    // Create redness
-                    document.documentElement.style.setProperty('--neon-blue', '#ff0000');
-                }
-                blackHoleScale += 0.5; // Grow the hole
-            }
+            // Stars
+            stars.forEach(s => { s.update(speed); s.draw(); });
 
-            // 10s: THE DROP
-            if (elapsed >= 10000) {
-                if(phase !== 'DONE') {
-                    phase = 'DONE';
-                    triggerEnd();
-                }
-                return; // Stop animation loop
-            }
-
-            // --- DRAWING ---
-            
-            // 1. Clear Screen (with trail effect for speed)
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.fillRect(0, 0, width, height);
-
-            // 2. Draw Stars
-            stars.forEach(s => { s.update(); s.draw(); });
-
-            // 3. Draw Galaxies
-            galaxies.forEach((g, i) => {
-                g.update();
-                g.draw();
-                if(g.z < 0) galaxies.splice(i, 1);
+            // Bodies (Galaxies/Planets)
+            bodies.forEach((b, i) => {
+                b.update(speed);
+                b.draw();
+                if(b.z < 0) bodies.splice(i, 1);
             });
 
-            // 4. Draw Planets
-            planets.forEach((p, i) => {
-                p.update();
-                p.draw();
-                if(p.z < 0) planets.splice(i, 1);
-            });
-
-            // 5. Draw Black Hole (Overlay)
-            if(phase === 'HOLE') {
-                const radius = (elapsed - 8000) / 4; // Grow size
-                
-                // Accretion Disk
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius * 1.5, 0, Math.PI*2);
-                ctx.strokeStyle = 'orange';
-                ctx.lineWidth = 10;
-                ctx.shadowBlur = 50;
-                ctx.shadowColor = 'red';
-                ctx.stroke();
-
-                // The Event Horizon (Black)
-                ctx.fillStyle = '#000';
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius, 0, Math.PI*2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            // Black Hole (Phase 3 Overlay)
+            if(phase === 3) {
+                let size = (elapsed - 8000) * 0.5;
+                let holeImg = loadedImages.blackhole;
+                if(holeImg) {
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    // Spin the hole
+                    ctx.rotate(elapsed * 0.005);
+                    ctx.globalCompositeOperation = 'screen'; // Blend it
+                    // Draw massive expanding hole
+                    ctx.drawImage(holeImg, -size, -size, size*2, size*2);
+                    ctx.restore();
+                }
             }
 
-            requestAnimationFrame(loop);
+            requestAnimationFrame(animate);
         }
 
-        function triggerEnd() {
-            // Flash White
-            const flash = document.getElementById('flash');
-            flash.style.opacity = 1;
-
-            // Clean up UI
+        function finish() {
+            document.getElementById('flash-screen').style.opacity = 1;
+            document.getElementById('hud-ui').style.opacity = 0;
+            document.getElementById('timer').style.opacity = 0;
             document.body.classList.remove('shake');
-            document.getElementById('hud-layer').classList.add('hidden');
-            canvas.style.display = 'none';
-
+            
             setTimeout(() => {
-                flash.style.opacity = 0;
-                // Reveal Card
-                document.getElementById('final-card').classList.add('visible');
-            }, 1000);
+                canvas.style.display = 'none';
+                document.getElementById('flash-screen').style.opacity = 0;
+                document.getElementById('card').classList.add('show');
+            }, 500);
         }
 
         // Start
-        loop();
+        animate();
 
     </script>
 </body>
