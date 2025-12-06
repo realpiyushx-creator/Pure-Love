@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Journey</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <title>Cosmic Message</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Playfair+Display:ital,wght@1,400&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #000000;
-            --glass: rgba(10, 10, 10, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(15, 15, 15, 0.85);
+            --border: rgba(255, 255, 255, 0.15);
             --accent: #ffffff;
         }
 
@@ -32,16 +32,16 @@
             z-index: 1;
         }
 
-        /* Cinematic Vignette (Dark corners) */
+        /* Cinematic Vignette */
         .vignette {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 50%, black 100%);
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.5) 60%, black 100%);
             z-index: 2;
             pointer-events: none;
         }
 
-        /* Timer Display */
+        /* Timer UI */
         .timer-display {
             position: absolute;
             top: 15%;
@@ -53,20 +53,20 @@
             transition: opacity 0.5s;
         }
 
-        /* The Final Popup */
+        /* The Final Popup Card */
         .glass-card {
             z-index: 50;
             position: relative;
-            padding: 5rem 8rem;
+            padding: 6rem 9rem;
             
-            /* Glass Effect */
+            /* Glassmorphism */
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px) saturate(1.2);
+            -webkit-backdrop-filter: blur(30px) saturate(1.2);
             border: 1px solid var(--border);
-            border-top: 1px solid rgba(255,255,255,0.3);
-            border-radius: 2px;
-            box-shadow: 0 50px 100px black;
+            border-top: 1px solid rgba(255,255,255,0.4);
+            border-radius: 4px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
             
             display: flex;
             flex-direction: column;
@@ -74,8 +74,8 @@
             text-align: center;
             
             opacity: 0;
-            transform: scale(0.9) translateY(20px);
-            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: scale(0.9) translateY(30px);
+            transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         .glass-card.show {
@@ -83,30 +83,34 @@
             transform: scale(1) translateY(0);
         }
 
+        /* Main Aggressive Text */
         h1 {
-            font-size: 5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 5.5rem;
             font-weight: 900;
             margin: 0;
             line-height: 0.9;
             text-transform: uppercase;
             color: white;
-            /* Subtle text shadow */
-            text-shadow: 0 0 30px rgba(255,255,255,0.2);
+            letter-spacing: -2px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* Elegant Subtext */
         .sub {
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            letter-spacing: 0.6em;
-            text-transform: uppercase;
-            color: #888;
+            margin-top: 2rem;
+            font-family: 'Playfair Display', serif; /* Classy font */
+            font-style: italic;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         /* White Flash Overlay */
         .flash-white {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 100; opacity: 0; pointer-events: none;
-            transition: opacity 3s ease-out;
+            transition: opacity 2.5s ease-out;
         }
     </style>
 </head>
@@ -116,17 +120,17 @@
     <div class="vignette"></div>
     <canvas id="universe"></canvas>
     
-    <div class="timer-display" id="timer">SEQUENCE STARTED</div>
+    <div class="timer-display" id="timer">INITIALIZING...</div>
 
     <div class="glass-card" id="final-card">
         <h1>Fuck You<br>Dude.</h1>
-        <div class="sub">Message Received</div>
+        <div class="sub">with love from universe</div>
     </div>
 
     <script>
         /**
-         * ENGINE SETUP
-         * No external images = No loading times.
+         * PROCEDURAL ENGINE
+         * No Loading Screens. Instant Start.
          */
         const canvas = document.getElementById('universe');
         const ctx = canvas.getContext('2d');
@@ -142,9 +146,9 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- PROCEDURAL GENERATION CLASSES ---
+        // --- CLASSES ---
 
-        // 1. Tiny Realistic Stars
+        // 1. Stars
         class Star {
             constructor() { this.reset(true); }
             reset(init) {
@@ -161,22 +165,21 @@
                 let x = (this.x / this.z) * w + cx;
                 let y = (this.y / this.z) * w + cy;
                 if(x<0 || x>w || y<0 || y>h) return;
-
                 let alpha = (1 - this.z / 3000) * this.brightness;
                 ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                 let size = this.z < 1000 ? 1.5 : 0.8; 
-                ctx.fillRect(x, y, size, size); // Crisp pixels
+                ctx.fillRect(x, y, size, size);
             }
         }
 
-        // 2. Procedural Galaxy (Spiral Gradients)
+        // 2. Procedural Galaxy
         class Galaxy {
             constructor() {
                 this.x = (Math.random() - 0.5) * w * 4;
                 this.y = (Math.random() - 0.5) * h * 2;
                 this.z = 4000;
                 this.angle = Math.random() * Math.PI * 2;
-                this.color = Math.random() > 0.5 ? '200, 100, 255' : '100, 200, 255'; // Purple or Cyan
+                this.color = Math.random() > 0.5 ? '200, 100, 255' : '100, 200, 255'; 
             }
             update(speed) {
                 this.z -= speed;
@@ -193,7 +196,6 @@
                 ctx.translate(x, y);
                 ctx.rotate(this.angle);
                 
-                // Draw Spiral Core
                 let grad = ctx.createRadialGradient(0,0, 0, 0,0, scale);
                 grad.addColorStop(0, 'white');
                 grad.addColorStop(0.2, `rgba(${this.color}, 0.8)`);
@@ -201,21 +203,19 @@
                 
                 ctx.fillStyle = grad;
                 ctx.beginPath(); 
-                // Flatten to look like a disk
                 ctx.ellipse(0, 0, scale*2, scale, 0, 0, Math.PI*2);
                 ctx.fill();
-                
                 ctx.restore();
             }
         }
 
-        // 3. Procedural Planet (Saturn-like with Rings)
+        // 3. Procedural Planet
         class Planet {
             constructor() {
                 this.x = (Math.random() - 0.5) * w * 4;
                 this.y = (Math.random() - 0.5) * h * 2;
                 this.z = 4000;
-                this.radius = 50 + Math.random() * 100;
+                this.radius = 60 + Math.random() * 80;
                 this.tilt = (Math.random() - 0.5);
             }
             update(speed) { this.z -= speed; }
@@ -231,14 +231,14 @@
                 ctx.translate(x, y);
                 ctx.rotate(this.tilt);
 
-                // Draw Rings (Behind)
+                // Rings
                 ctx.beginPath();
-                ctx.ellipse(0, 0, r*2.5, r*0.6, 0, 0, Math.PI*2);
+                ctx.ellipse(0, 0, r*2.2, r*0.5, 0, 0, Math.PI*2);
                 ctx.strokeStyle = 'rgba(200, 180, 150, 0.4)';
                 ctx.lineWidth = r/5;
                 ctx.stroke();
 
-                // Draw Planet Body
+                // Planet Body
                 let grad = ctx.createRadialGradient(-r/2, -r/2, 0, 0, 0, r);
                 grad.addColorStop(0, '#eec');
                 grad.addColorStop(1, '#864');
@@ -246,15 +246,15 @@
                 ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.fill();
 
                 // Shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
                 ctx.beginPath(); ctx.arc(r/3, r/3, r, 0, Math.PI*2); ctx.fill();
 
                 ctx.restore();
             }
         }
 
-        // --- STATE & ANIMATION ---
-        const stars = Array(1000).fill().map(() => new Star());
+        // --- ANIMATION LOOP ---
+        const stars = Array(1200).fill().map(() => new Star());
         const spaceObjects = [];
         let startTime = Date.now();
         let speed = 20;
@@ -265,61 +265,41 @@
             let rawTime = 10 - elapsed/1000;
             let timeLeft = Math.max(0, rawTime).toFixed(2);
             
-            // Timer Display Logic
             if(rawTime > 0) {
                 document.getElementById('timer').innerText = `T-MINUS ${timeLeft}s`;
             } else {
                 document.getElementById('timer').style.opacity = 0;
             }
 
-            // --- TIMELINE ---
-            // 2s: Galaxy
-            if(elapsed > 2000 && phase === 0) {
-                phase = 1;
-                spaceObjects.push(new Galaxy());
-            }
-            // 5s: Planet
-            if(elapsed > 5000 && phase === 1) {
-                phase = 2; speed = 50;
-                spaceObjects.push(new Planet());
-            }
-            // 8s: Warp Speed & Black Hole visuals
-            if(elapsed > 8000 && phase === 2) {
-                phase = 3; speed = 120;
-            }
-            // 10s: End
-            if(elapsed > 10000) {
-                endSequence();
-                return;
-            }
+            // Timeline Events
+            if(elapsed > 2000 && phase === 0) { phase = 1; spaceObjects.push(new Galaxy()); }
+            if(elapsed > 5000 && phase === 1) { phase = 2; speed = 50; spaceObjects.push(new Planet()); }
+            if(elapsed > 8000 && phase === 2) { phase = 3; speed = 120; } // Warp
+            if(elapsed > 10000) { endSequence(); return; }
 
-            // --- DRAW FRAME ---
+            // Draw
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, w, h);
 
             stars.forEach(s => { s.update(speed); s.draw(); });
-            
-            spaceObjects.forEach(obj => {
-                obj.update(speed);
-                obj.draw();
-            });
+            spaceObjects.forEach(obj => { obj.update(speed); obj.draw(); });
 
-            // Black Hole Effect (Procedural)
+            // Black Hole Overlay
             if(phase === 3) {
-                let p = (elapsed - 8000) / 2000; // 0 to 1
-                let r = p * w * 0.8;
+                let p = (elapsed - 8000) / 2000; 
+                let r = p * w * 0.9;
                 
-                // Draw Accretion Disk Glow
+                // Glow
                 let grad = ctx.createRadialGradient(cx, cy, r*0.8, cx, cy, r*1.2);
                 grad.addColorStop(0, 'black');
-                grad.addColorStop(0.4, 'orange');
+                grad.addColorStop(0.4, '#ffaa00');
                 grad.addColorStop(1, 'transparent');
                 
                 ctx.globalCompositeOperation = 'screen';
                 ctx.fillStyle = grad;
                 ctx.beginPath(); ctx.arc(cx, cy, r*2, 0, Math.PI*2); ctx.fill();
                 
-                // Draw Event Horizon (Black Void)
+                // Void
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.fillStyle = 'black';
                 ctx.beginPath(); ctx.arc(cx, cy, r*0.9, 0, Math.PI*2); ctx.fill();
@@ -334,12 +314,10 @@
                 canvas.style.display = 'none';
                 document.getElementById('flash').style.opacity = 0;
                 document.getElementById('final-card').classList.add('show');
-            }, 1000);
+            }, 800);
         }
 
-        // START IMMEDIATELY
-        animate();
-
+        animate(); // Go
     </script>
 </body>
 </html>
